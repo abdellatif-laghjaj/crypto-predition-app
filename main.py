@@ -27,3 +27,9 @@ x_train, y_train = [], []
 for i in range(predictio_days, len(scaled_data)):
     x_train.append(scaled_data[i-predictio_days:i, 0])
     y_train.append(scaled_data[i, 0])
+
+x_train, y_train = np.array(x_train), np.array(y_train)
+x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
+
+#Create the neural network
+model = Sequential()
