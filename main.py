@@ -21,12 +21,12 @@ data = web.DataReader(f'{crypto_currency}-{against_currency}', 'yahoo', start, e
 scaler = MinMaxScaler(feature_range=(0,1))
 scaled_data = scaler.fit_transform(data['Close'].values.reshape(-1,1))
 
-predictio_days = int(input('How many days do you want to predict?: '))
+prediction_days = int(input('How many days do you want to predict?: '))
 
 x_train, y_train = [], []
 
-for i in range(predictio_days, len(scaled_data)):
-    x_train.append(scaled_data[i-predictio_days:i, 0])
+for i in range(prediction_days, len(scaled_data)):
+    x_train.append(scaled_data[i-prediction_days:i, 0])
     y_train.append(scaled_data[i, 0])
 
 x_train, y_train = np.array(x_train), np.array(y_train)
@@ -43,3 +43,14 @@ model.add(Dropout(0.2))
 model.add(Dense(units=1))
 
 model.compile(optimizer='adam', loss='mean_squared_error')
+model.fit(x_train, y_train, epochs=25, batch_size=32)
+
+#Test the model
+test_start = dt.datetime(2020, 1, 1)
+test_end = dt.datetime.now()
+
+test_data = web.DataReader(f'{crypto_currency}-{against_currency}', 'yahoo', test_start, test_end)
+actual_prices = test_data['Close'].values
+
+total_dataset = pd.concat((data['Close'], test_data['Close']), axis=0)
+model_inputs = total_dataset[len(total_dataset) - len(test_data) - prediction_days:].values
